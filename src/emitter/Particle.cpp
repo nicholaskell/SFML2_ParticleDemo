@@ -11,42 +11,60 @@
 
 namespace ic {
 
-//	sf::Texture Particle::texture;
+//	sf::Texture Particle::partTexture;
 
 	Particle::Particle() :
 			sf::Sprite() {
-		// TODO Auto-generated constructor stub
-		init();
+		srand((unsigned) time(0));
+		respawn();
+		flaggedToDie = false;
 
 		pointOfOrigin = sf::Vector2f(100, 100);
 		this->setOrigin(16.0, 16.0);
 	}
 
 	Particle::~Particle() {
-		// TODO Auto-generated destructor stub
+
 	}
 
-	void Particle::init() {
-//		srand((unsigned)time(0));
-//
-//		idNumber = name;
-		gravity = 0.0001;
-		alpha = 255.0;
-		x = 400; //3.0*(float)rand()/(float)RAND_MAX;
-		y = 300; //3.0*(float)rand()/(float)RAND_MAX;
+	bool Particle::isAlive() {
+		bool alive = true;
 
+		if (alpha <= 1.0) {
+//					respawn();
+			alive = false;
+		} else if (timeToLive < lifeClock.getElapsedTime()) {
+//					respawn();
+			alive = false;
+		} else {
+
+		}
+
+
+		return alive;
+	}
+
+	void Particle::init(sf::Vector2f newPoO) {
+		pointOfOrigin = newPoO;
+		lifeClock.restart();
+		environment.y = 0.001;
+		environment.x = 0.001;
+		alpha = 255.0;
+		coords = pointOfOrigin;
 		float dirVar = 1.0;
 
-		directionX = (dirVar * (float) rand() / (float) RAND_MAX)
+		timeToLive = sf::milliseconds(
+				((5000 * (float) rand() / (float) RAND_MAX)));
+
+		direction.x = (dirVar * (float) rand() / (float) RAND_MAX)
 				- (dirVar / 2);
-		directionY = (dirVar * (float) rand() / (float) RAND_MAX)
+		direction.y = (dirVar * (float) rand() / (float) RAND_MAX)
 				- (dirVar / 2);
 
+		rateOfDeath = 1.0 * (float) rand() / (float) RAND_MAX + 0.1;
 
-			rateOfDeath = 1.0 * (float) rand() / (float) RAND_MAX + 0.1;
-
-			this->setRotation(rateOfDeath);
-			this->setScale(rateOfDeath, rateOfDeath);
+		this->setRotation(rateOfDeath);
+		this->setScale(rateOfDeath, rateOfDeath);
 
 		sf::Uint8 r = sf::Uint8(255 * (float) rand() / (float) RAND_MAX);
 		sf::Uint8 g = sf::Uint8(255 * (float) rand() / (float) RAND_MAX);
@@ -56,74 +74,90 @@ namespace ic {
 
 		sf::Color color(r, g, b, 255);
 		this->setColor(color);
-		update();
-
-//		std::cout << "R- " << float(getColor().r) << std::endl;
-//		std::cout << "G- " << float(getColor().g) << std::endl;
-//		std::cout << "B- " << float(getColor().b) << std::endl;
-//		std::cout << "alpha C- " << float(getColor().a) << std::endl;
-//		std::cout << "alpha- " << alpha << std::endl;
-//		std::cout << "RoD- "<<rateOfDeath << std::endl;
+		update(true);
 
 	}
 
 	void Particle::respawn() {
-		init();
+		flaggedToDie = false;
+		flaggedToRespawn = false;
+		init(pointOfOrigin);
 	}
 
-
-	void Particle::setDirection(float dx, float dy) {
-		directionX = dx;
-		directionY = dy;
+	void Particle::setSpawnOrigin(sf::Vector2f poo) {
+		pointOfOrigin = poo;
 	}
 
 	void Particle::setDirection(sf::Vector2f dir) {
-		setDirection(dir.x, dir.y);
+		environment = dir;
 	}
 
-	void Particle::update() {
-//		gravity += gravity;
-//		gravity /= gravity;
-//		gravity -= gravity;
-//		y+=gravity;
-		float nX = ((x-alpha)/alpha);
-		gravity += nX/5.0;//*(sqrt(sin(nX+M_PI/2)));
-//		y+=gravity;
-		setPosition(x += directionX, (y += directionY)+gravity);
-		if(idNumber == 1){
-			std::cout <<"A:"<<alpha << "\tx:"<<x<<" \ty:"<<y <<" \tnX - "<<nX <<" \tG- "<<gravity<<std::endl;
+	void Particle::setTimeToLive(sf::Time ttl) {
+		timeToLive = ttl;
+	}
+
+	void Particle::setWind(float wind) {
+		environment.x = wind;
+	}
+
+	void Particle::setGravity(float gravity) {
+		environment.y = gravity;
+	}
+
+	void Particle::setAlpha(float al) {
+		alpha = al;
+	}
+
+	void Particle::update(bool resp) {
+		if(resp){
+			flaggedToRespawn = true;
+		}else{
+			flaggedToDie = true;
 		}
+		float nX = (float) rand() / (float) RAND_MAX; //((coords.x - alpha) / alpha);
+		environment.y += nX; //Gravity
+		environment.x += nX * 0.1; // / 1.0; //Wind
+		coords += direction; //
+//		coords+=environment;
+
+		setPosition(coords + environment);
+
+//		if (idNumber != 1) {
+//			std::cout << "A:" << alpha << "\tx:" << coords.x << " \ty:"
+//					<< environment.x << " \tnX - " << nX << " \tG- "
+//					<< environment.y << std::endl;
+//		}
 
 		sf::Color color = getColor();
-		color.a = sf::Uint8(alpha-=rateOfDeath);
+		color.a = sf::Uint8(alpha -= rateOfDeath);
 
 
+		setColor(color);
 
-		if (alpha <= 1.0) {
-			respawn();
-		} else {
-
-//			std::cout << "alpha C- " << float(getColor().a) << std::endl;
-//			std::cout << "alpha- " << alpha << std::endl;
-//			std::cout << "RoD- "<<rateOfDeath << std::endl;
-			setColor(color);
+		if (isAlive()) {
 		}
-	}
 
-	bool Particle::isAlive() {
-		return TTL > 0;
-	}
+		if (!isAlive() && flaggedToDie) {
+			color.a = 0;
+			setColor(color);
+//			respawn();
+		}
+		if(!isAlive() && !flaggedToDie){
+//			setColor(color);
+			respawn();
+		}
 
-	int Particle::getTTL() const {
-		return TTL;
-	}
+		if(!isAlive() && resp){
+			respawn();
+		}
+//		if(!isAlive() && flaggedToRespawn){
+//			flaggedToRespawn = false;
+//		}
 
-	void Particle::decrementTTL(int num) {
-		TTL -= num;
-	}
-
-	void Particle::setTTL(int TTL) {
-		this->TTL = TTL;
+//		if(!isAlive() && flaggedToDie){
+////			flaggedToRespawn = true;
+////			respawn();
+//		}
 	}
 
 } /* namespace ic */

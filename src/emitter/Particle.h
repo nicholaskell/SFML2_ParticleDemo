@@ -16,31 +16,31 @@ namespace ic {
 		public:
 			Particle();
 			virtual ~Particle();
-//			static void setTexture(sf::Texture);
-			bool isAlive();
-			void decrementTTL(int num = 1);
-			int getTTL() const;
-			void setTTL(int);
-			void update();
-			void setDirection(float,float);
-			void setDirection(sf::Vector2f);
-			void setPointOfOrigin(sf::Vector2f);
-			void setPointOfOrigin(float,float);
-
-			void init();
+			void setLives(int);
+			void update(bool);
+			void init(sf::Vector2f);
 			void setId(int id){idNumber = id;};
+			void setTimeToLive(sf::Time);
+			void setDirection(sf::Vector2f);
+			void setWind(float);
+			void setGravity(float);
+			void setAlpha(float);
+			void setSpawnOrigin(sf::Vector2f);
+			bool isAlive();
 
 		protected:
-			int idNumber;
-			float gravity;
 			void respawn();
-			sf::Texture texture;
-			bool isVisible;
+			int lives;
+			bool flaggedToDie;
+			bool flaggedToRespawn;
+			sf::Clock lifeClock;
+			int idNumber;
+			sf::Time timeToLive;
+			sf::Vector2f environment;
 			float alpha;
-			float x,y;
-			float velocity;
-			int TTL;
-			float directionX,directionY;
+			sf::Vector2f coords;
+			sf::Vector2f velocity;
+			sf::Vector2f direction;
 			sf::Vector2f pointOfOrigin;
 			float rateOfDeath;
 

@@ -10,7 +10,7 @@
 
 #include "Particle.h"
 
-#define NUM_PARTICLES 100
+#define NUM_PARTICLES 1000
 
 namespace ic {
 
@@ -22,14 +22,20 @@ namespace ic {
 			void start();
 			void draw();
 			void setRenderWindow(sf::RenderWindow* renWin);
+			void setNumberOfParticles(int);
+			void setDuty(float);
 
 		protected:
-//			Particle particle;
+			int numberOfParticlesAlive;
+			int numberOfParticles;
+			float sinAdjust;
+			sf::Vector2f emitterPoint;
 			sf::Texture texture;
 			sf::Time frequencyOfRelease;
 			sf::Clock clock;
 			sf::RenderWindow* renderWindow;
-			Particle particles[NUM_PARTICLES];
+			Particle* particles;
+			float percentOfDuty;
 	};
 
 } /* namespace ic */
