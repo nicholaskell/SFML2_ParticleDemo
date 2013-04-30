@@ -72,7 +72,7 @@ namespace ic {
 		alpha = 255.0;
 		sf::Uint8 a = sf::Uint8(alpha);
 
-		sf::Color color(r, g, b, 255);
+		sf::Color color(128, 255, 128, 255);
 		this->setColor(color);
 		update(true);
 

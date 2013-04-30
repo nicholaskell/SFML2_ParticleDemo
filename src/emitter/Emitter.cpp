@@ -25,6 +25,7 @@ namespace ic {
 		emitterPoint.y = 300;
 		numberOfParticles = 0;
 //		setNumberOfParticles(100);
+particles = NULL;
 
 	}
 
@@ -38,7 +39,7 @@ namespace ic {
 
 	void Emitter::start() {
 		clock.restart();
-		particles = new Particle[100];
+		//particles = new Particle[100];
 
 	}
 
@@ -47,7 +48,10 @@ namespace ic {
 
 		sf::Vector2f dir;
 //
-		delete particles;
+	//	delete particles;
+	if(particles){
+		delete[] particles;
+	}
 
 		particles = new Particle[nums];
 
@@ -95,7 +99,7 @@ namespace ic {
 
 			}
 
-			emitterPoint.x += 0.01;
+			emitterPoint.x += 0.05;
 
 			particles[i].setSpawnOrigin(emitterPoint);
 			if (emitterPoint.x > renderWindow->getSize().x) {
@@ -108,7 +112,7 @@ namespace ic {
 		}
 		std::cout << std::endl;
 		numberOfParticlesAlive = aliveParticles;
-		sinAdjust += 0.001;
+		sinAdjust += 0.1;
 		if (sinAdjust > 100.0) {
 			sinAdjust = 1.0;
 		}
